@@ -1,9 +1,12 @@
+'use strict';
 const buttons = document.querySelector('.button-wrapper');
 const display = document.querySelector('.display');
-const add = (n1, n2) => parseFloat(n1) + parseFloat(n2);
-const sub = (n1, n2) => parseFloat(n1) - parseFloat(n2);
-const mul = (n1, n2) => parseFloat(n1) * parseFloat(n2);
-const div = (n1, n2) => parseFloat(n1) / parseFloat(n2);
+const operations = {
+    add: (n1, n2) => parseFloat(n1) + parseFloat(n2),
+    sub: (n1, n2) => parseFloat(n1) - parseFloat(n2),
+    mul: (n1, n2) => parseFloat(n1) * parseFloat(n2),
+    div: (n1, n2) => parseFloat(n1) / parseFloat(n2),
+};
 const updateDisplay = value => display.textContent = value;
 const states = {
     START: 1,   // initial state where no key is pressed
@@ -62,6 +65,25 @@ buttons.addEventListener('click', e => {
                 operatorKey = btnValue;
                 firstOperand = disp;
                 currentState = states.OP;
+            }
+            break;
+        case states.OP:
+            if (btnType === 'number') {
+                disp = btnValue;
+                updateDisplay(disp);
+                currentState = states.SECOND_NUM;
+            }
+            break;
+        case states.SECOND_NUM:
+            if (btnType === 'number') {
+                disp += btnValue;
+                updateDisplay(disp);
+            }
+            if (btnType === 'key_eq') {
+                secondOperand = disp;
+                disp = operations[operatorKey](firstOperand, secondOperand);
+                updateDisplay(disp);
+                currentState = states.EQUALS;
             }
             break;
         default:

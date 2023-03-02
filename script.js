@@ -6,6 +6,7 @@ const operations = {
     sub: (n1, n2) => parseFloat(n1) - parseFloat(n2),
     mul: (n1, n2) => parseFloat(n1) * parseFloat(n2),
     div: (n1, n2) => parseFloat(n1) / parseFloat(n2),
+    neg: n => n * -1,
 };
 const updateDisplay = value => display.textContent = value;
 const states = {
@@ -68,6 +69,10 @@ buttons.addEventListener('click', e => {
                 firstOperand = disp;
                 currentState = states.OP;
             }
+            if (btnType === 'key_neg') {
+                disp = operations[btnValue](disp);
+                updateDisplay(disp);
+            }
             if (btnType === 'key_ce') {
                 disp = 0;
                 updateDisplay(disp);
@@ -83,6 +88,10 @@ buttons.addEventListener('click', e => {
                 operatorKey = btnValue;
                 firstOperand = disp;
                 currentState = states.OP;
+            }
+            if (btnType === 'key_neg') {
+                disp = operations[btnValue](disp);
+                updateDisplay(disp);
             }
             if (btnType === 'key_ce') {
                 disp = 0;
@@ -128,6 +137,10 @@ buttons.addEventListener('click', e => {
                 updateDisplay(disp);
                 currentState = states.SECOND_NUM_WITH_DECIMAL;
             }
+            if (btnType === 'key_neg') {
+                disp = operations[btnValue](disp);
+                updateDisplay(disp);
+            }
             if (btnType === 'key_eq') {
                 secondOperand = disp;
                 disp = operations[operatorKey](firstOperand, secondOperand);
@@ -152,6 +165,10 @@ buttons.addEventListener('click', e => {
                 firstOperand = disp;
                 currentState = states.OP;
             }
+            if (btnType === 'key_neg') {
+                disp = operations[btnValue](disp);
+                updateDisplay(disp);
+            }
             if (btnType === 'key_eq') {
                 secondOperand = disp;
                 disp = operations[operatorKey](firstOperand, disp);
@@ -168,6 +185,10 @@ buttons.addEventListener('click', e => {
             if (btnType === 'key_eq') {
                 secondOperand = secondOperand ?? firstOperand;
                 disp = operations[operatorKey](disp, secondOperand);
+                updateDisplay(disp);
+            }
+            if (btnType === 'key_neg') {
+                disp = operations[btnValue](disp);
                 updateDisplay(disp);
             }
             if (btnType === 'operator') {

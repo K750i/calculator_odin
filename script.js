@@ -29,6 +29,7 @@ buttons.addEventListener('click', e => {
     switch (currentState) {
         case states.START:
             if (btnType === 'number') {
+                if (btnValue === '0') return;
                 disp = btnValue;
                 updateDisplay(disp);
                 currentState = states.FIRST_NUM;
@@ -70,6 +71,7 @@ buttons.addEventListener('click', e => {
             if (btnType === 'number') {
                 disp = btnValue;
                 updateDisplay(disp);
+                if (btnValue === '0') return;
                 currentState = states.SECOND_NUM;
             }
             if (btnType === 'operator') {
@@ -141,6 +143,7 @@ buttons.addEventListener('click', e => {
                 operatorKey = btnValue;
                 currentState = states.OP;
             }
+            // TODO - btnType === 'number' (ignore leading zero)
             break;
         default:
             break;

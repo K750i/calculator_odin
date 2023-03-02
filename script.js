@@ -6,7 +6,7 @@ const operations = {
     sub: (n1, n2) => parseFloat(n1) - parseFloat(n2),
     mul: (n1, n2) => parseFloat(n1) * parseFloat(n2),
     div: (n1, n2) => parseFloat(n1) / parseFloat(n2),
-    neg: n => parseFloat(n) * -1.0,
+    neg: n => n.startsWith('-') ? n.slice(1) : '-' + n,
 };
 const updateDisplay = value => display.textContent = value;
 const states = {
@@ -80,7 +80,7 @@ buttons.addEventListener('click', e => {
                 currentState = states.OP;
             }
             if (btnType === 'key_neg') {
-                disp = operations[btnValue](disp);
+                disp = operations[btnValue](disp.toString());
                 updateDisplay(disp);
             }
             if (btnType === 'key_ce') {
@@ -104,7 +104,7 @@ buttons.addEventListener('click', e => {
                 currentState = states.OP;
             }
             if (btnType === 'key_neg') {
-                disp = operations[btnValue](disp);
+                disp = operations[btnValue](disp.toString());
                 updateDisplay(disp);
             }
             if (btnType === 'key_ce') {
@@ -156,7 +156,7 @@ buttons.addEventListener('click', e => {
                 currentState = states.SECOND_NUM_WITH_DECIMAL;
             }
             if (btnType === 'key_neg') {
-                disp = operations[btnValue](disp);
+                disp = operations[btnValue](disp.toString());
                 updateDisplay(disp);
             }
             if (btnType === 'key_eq') {
@@ -188,7 +188,7 @@ buttons.addEventListener('click', e => {
                 currentState = states.OP;
             }
             if (btnType === 'key_neg') {
-                disp = operations[btnValue](disp);
+                disp = operations[btnValue](disp.toString());
                 updateDisplay(disp);
             }
             if (btnType === 'key_eq') {
@@ -214,7 +214,7 @@ buttons.addEventListener('click', e => {
                 updateDisplay(disp);
             }
             if (btnType === 'key_neg') {
-                disp = operations[btnValue](disp);
+                disp = operations[btnValue](disp.toString());
                 updateDisplay(disp);
             }
             if (btnType === 'operator') {

@@ -17,6 +17,14 @@ const states = {
     OP: 6,  // an operator key is pressed
     EQUALS: 7,   // equal key is pressed
 };
+const reset = () => {
+    currentState = states.START;
+    disp = 0;
+    firstOperand = null;
+    secondOperand = null;
+    operatorKey = null;
+    updateDisplay(disp);
+};
 let currentState = states.START;
 let disp;
 let firstOperand;
@@ -24,8 +32,13 @@ let secondOperand;
 let operatorKey;
 
 buttons.addEventListener('click', e => {
-    const btnType = e.target.dataset.type;
-    const btnValue = e.target.dataset.value;
+    const { type: btnType, value: btnValue } = e.target.dataset;
+
+    if (btnType === 'key_ac') {
+        reset();
+        return;
+    }
+
     switch (currentState) {
         case states.START:
             if (btnType === 'number') {
@@ -55,6 +68,11 @@ buttons.addEventListener('click', e => {
                 firstOperand = disp;
                 currentState = states.OP;
             }
+            if (btnType === 'key_ce') {
+                disp = 0;
+                updateDisplay(disp);
+                currentState = states.START;
+            }
             break;
         case states.FIRST_NUM_WITH_DECIMAL:
             if (btnType === 'number') {
@@ -65,6 +83,11 @@ buttons.addEventListener('click', e => {
                 operatorKey = btnValue;
                 firstOperand = disp;
                 currentState = states.OP;
+            }
+            if (btnType === 'key_ce') {
+                disp = 0;
+                updateDisplay(disp);
+                currentState = states.START;
             }
             break;
         case states.OP:
@@ -111,6 +134,11 @@ buttons.addEventListener('click', e => {
                 updateDisplay(disp);
                 currentState = states.EQUALS;
             }
+            if (btnType === 'key_ce') {
+                disp = 0;
+                updateDisplay(disp);
+                currentState = states.OP;
+            }
             break;
         case states.SECOND_NUM_WITH_DECIMAL:
             if (btnType === 'number') {
@@ -129,6 +157,11 @@ buttons.addEventListener('click', e => {
                 disp = operations[operatorKey](firstOperand, disp);
                 updateDisplay(disp);
                 currentState = states.EQUALS;
+            }
+            if (btnType === 'key_ce') {
+                disp = 0;
+                updateDisplay(disp);
+                currentState = states.OP;
             }
             break;
         case states.EQUALS:

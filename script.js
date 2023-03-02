@@ -6,7 +6,7 @@ const operations = {
     sub: (n1, n2) => parseFloat(n1) - parseFloat(n2),
     mul: (n1, n2) => parseFloat(n1) * parseFloat(n2),
     div: (n1, n2) => parseFloat(n1) / parseFloat(n2),
-    neg: n => n * -1,
+    neg: n => parseFloat(n) * -1.0,
 };
 const updateDisplay = value => display.textContent = value;
 const states = {
@@ -25,6 +25,16 @@ const reset = () => {
     secondOperand = null;
     operatorKey = null;
     updateDisplay(disp);
+};
+const deleteNum = state => {
+    disp = disp.toString();
+    if (disp.length === 1 || (disp.length === 2 && disp.startsWith('-'))) {
+        disp = 0;
+        currentState = state;
+    }
+    else {
+        disp = disp.slice(0, -1);
+    }
 };
 let currentState = states.START;
 let disp;
@@ -78,6 +88,10 @@ buttons.addEventListener('click', e => {
                 updateDisplay(disp);
                 currentState = states.START;
             }
+            if (btnType === 'key_del') {
+                deleteNum(states.START);
+                updateDisplay(disp);
+            }
             break;
         case states.FIRST_NUM_WITH_DECIMAL:
             if (btnType === 'number') {
@@ -97,6 +111,10 @@ buttons.addEventListener('click', e => {
                 disp = 0;
                 updateDisplay(disp);
                 currentState = states.START;
+            }
+            if (btnType === 'key_del') {
+                deleteNum(states.START);
+                updateDisplay(disp);
             }
             break;
         case states.OP:
@@ -152,6 +170,10 @@ buttons.addEventListener('click', e => {
                 updateDisplay(disp);
                 currentState = states.OP;
             }
+            if (btnType === 'key_del') {
+                deleteNum(states.OP);
+                updateDisplay(disp);
+            }
             break;
         case states.SECOND_NUM_WITH_DECIMAL:
             if (btnType === 'number') {
@@ -179,6 +201,10 @@ buttons.addEventListener('click', e => {
                 disp = 0;
                 updateDisplay(disp);
                 currentState = states.OP;
+            }
+            if (btnType === 'key_del') {
+                deleteNum(states.OP);
+                updateDisplay(disp);
             }
             break;
         case states.EQUALS:

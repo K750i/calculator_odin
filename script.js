@@ -17,6 +17,8 @@ const states = {
     SECOND_NUM_WITH_DECIMAL: 5, // number w/ decimal that comes after an operator key was pressed
     OP: 6,  // an operator key is pressed
     EQUALS: 7,   // equal key is pressed
+    FIRST_PCT: 8,    // pct key pressed before operator keys
+    SECOND_PCT: 9,  // pct key pressed after operator keys
 };
 const reset = () => {
     currentState = states.START;
@@ -83,6 +85,11 @@ buttons.addEventListener('click', e => {
                 disp = operations[btnValue](disp.toString());
                 updateDisplay(disp);
             }
+            if (btnType === 'key_pct') {
+                disp = disp / 100;
+                updateDisplay(disp);
+                currentState = states.FIRST_PCT;
+            }
             if (btnType === 'key_ce') {
                 disp = 0;
                 updateDisplay(disp);
@@ -106,6 +113,11 @@ buttons.addEventListener('click', e => {
             if (btnType === 'key_neg') {
                 disp = operations[btnValue](disp.toString());
                 updateDisplay(disp);
+            }
+            if (btnType === 'key_pct') {
+                disp = disp / 100;
+                updateDisplay(disp);
+                currentState = states.FIRST_PCT;
             }
             if (btnType === 'key_ce') {
                 disp = 0;
@@ -158,6 +170,12 @@ buttons.addEventListener('click', e => {
             if (btnType === 'key_neg') {
                 disp = operations[btnValue](disp.toString());
                 updateDisplay(disp);
+            }
+            if (btnType === 'key_pct') {
+                secondOperand = firstOperand * disp / 100;
+                disp = operations[operatorKey](firstOperand, secondOperand);
+                updateDisplay(disp);
+                currentState = states.SECOND_PCT;
             }
             if (btnType === 'key_eq') {
                 secondOperand = disp;
@@ -224,6 +242,41 @@ buttons.addEventListener('click', e => {
                 currentState = states.OP;
             }
             // TODO - btnType === 'number' (ignore leading zero)
+            break;
+        case states.FIRST_PCT:
+            if (btnType === 'key_pct') {
+                disp = disp / 100;
+                updateDisplay(disp);
+            }
+            if (btnType === 'number') {
+                disp = btnValue;
+                updateDisplay(disp);
+                if (btnValue === '0') return;
+                currentState = states.FIRST_NUM;
+            }
+            if (btnType === 'key_dot') {
+                disp = '0.';
+                updateDisplay(disp);
+                currentState = states.FIRST_NUM_WITH_DECIMAL;
+            }
+            if (btnType === 'operator') {
+                operatorKey = btnValue;
+                firstOperand = disp;
+                currentState = states.OP;
+            }
+            break;
+        case states.SECOND_PCT:
+            if (btnType === 'operator') {
+                operatorKey = btnValue;
+                firstOperand = disp;
+                updateDisplay(disp);
+                currentState = states.OP;
+            }
+            if (btnType === 'key_eq') {
+                disp = operations[operatorKey](disp, secondOperand);
+                updateDisplay(disp);
+                currentState = states.EQUALS;
+            }
             break;
         default:
             break;

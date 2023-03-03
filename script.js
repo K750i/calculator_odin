@@ -1,6 +1,6 @@
 'use strict';
 const buttons = document.querySelector('.button-wrapper');
-const display = document.querySelector('.display');
+const display = document.querySelector('.main-display');
 const operations = {
     add: (n1, n2) => parseFloat(n1) + parseFloat(n2),
     sub: (n1, n2) => parseFloat(n1) - parseFloat(n2),

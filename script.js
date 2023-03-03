@@ -52,6 +52,12 @@ buttons.addEventListener('click', e => {
         return;
     }
 
+    if (btnType === 'key_neg') {
+        disp = operations[btnValue](disp.toString());
+        updateDisplay(disp);
+        return;
+    }
+
     switch (currentState) {
         case states.START:
             if (btnType === 'number') {
@@ -81,10 +87,6 @@ buttons.addEventListener('click', e => {
                 firstOperand = disp;
                 currentState = states.OP;
             }
-            if (btnType === 'key_neg') {
-                disp = operations[btnValue](disp.toString());
-                updateDisplay(disp);
-            }
             if (btnType === 'key_pct') {
                 disp = disp / 100;
                 updateDisplay(disp);
@@ -109,10 +111,6 @@ buttons.addEventListener('click', e => {
                 operatorKey = btnValue;
                 firstOperand = disp;
                 currentState = states.OP;
-            }
-            if (btnType === 'key_neg') {
-                disp = operations[btnValue](disp.toString());
-                updateDisplay(disp);
             }
             if (btnType === 'key_pct') {
                 disp = disp / 100;
@@ -167,10 +165,6 @@ buttons.addEventListener('click', e => {
                 updateDisplay(disp);
                 currentState = states.SECOND_NUM_WITH_DECIMAL;
             }
-            if (btnType === 'key_neg') {
-                disp = operations[btnValue](disp.toString());
-                updateDisplay(disp);
-            }
             if (btnType === 'key_pct') {
                 if (operatorKey === 'mul' || operatorKey === 'div') {
                     secondOperand = disp / 100;
@@ -209,10 +203,6 @@ buttons.addEventListener('click', e => {
                 operatorKey = btnValue;
                 firstOperand = disp;
                 currentState = states.OP;
-            }
-            if (btnType === 'key_neg') {
-                disp = operations[btnValue](disp.toString());
-                updateDisplay(disp);
             }
             if (btnType === 'key_pct') {
                 if (operatorKey === 'mul' || operatorKey === 'div') {
@@ -256,10 +246,6 @@ buttons.addEventListener('click', e => {
             if (btnType === 'key_eq') {
                 secondOperand = secondOperand ?? firstOperand;
                 disp = operations[operatorKey](disp, secondOperand);
-                updateDisplay(disp);
-            }
-            if (btnType === 'key_neg') {
-                disp = operations[btnValue](disp.toString());
                 updateDisplay(disp);
             }
             if (btnType === 'operator') {

@@ -172,8 +172,13 @@ buttons.addEventListener('click', e => {
                 updateDisplay(disp);
             }
             if (btnType === 'key_pct') {
-                secondOperand = firstOperand * disp / 100;
-                disp = operations[operatorKey](firstOperand, secondOperand);
+                if (operatorKey === 'mul' || operatorKey === 'div') {
+                    secondOperand = disp / 100;
+                    disp = operations[operatorKey](firstOperand, secondOperand);
+                } else {
+                    secondOperand = firstOperand * disp / 100;
+                    disp = operations[operatorKey](firstOperand, secondOperand);
+                }
                 updateDisplay(disp);
                 currentState = states.SECOND_PCT;
             }

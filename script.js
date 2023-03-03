@@ -214,6 +214,17 @@ buttons.addEventListener('click', e => {
                 disp = operations[btnValue](disp.toString());
                 updateDisplay(disp);
             }
+            if (btnType === 'key_pct') {
+                if (operatorKey === 'mul' || operatorKey === 'div') {
+                    secondOperand = disp / 100;
+                    disp = operations[operatorKey](firstOperand, secondOperand);
+                } else {
+                    secondOperand = firstOperand * disp / 100;
+                    disp = operations[operatorKey](firstOperand, secondOperand);
+                }
+                updateDisplay(disp);
+                currentState = states.SECOND_PCT;
+            }
             if (btnType === 'key_eq') {
                 secondOperand = disp;
                 disp = operations[operatorKey](firstOperand, disp);
@@ -231,6 +242,17 @@ buttons.addEventListener('click', e => {
             }
             break;
         case states.EQUALS:
+            if (btnType === 'number') {
+                disp = btnValue;
+                updateDisplay(disp);
+                if (btnValue === '0') return;
+                currentState = states.FIRST_NUM;
+            }
+            if (btnType === 'key_dot') {
+                disp = '0.';
+                updateDisplay(disp);
+                currentState = states.FIRST_NUM_WITH_DECIMAL;
+            }
             if (btnType === 'key_eq') {
                 secondOperand = secondOperand ?? firstOperand;
                 disp = operations[operatorKey](disp, secondOperand);
@@ -246,7 +268,6 @@ buttons.addEventListener('click', e => {
                 operatorKey = btnValue;
                 currentState = states.OP;
             }
-            // TODO - btnType === 'number' (ignore leading zero)
             break;
         case states.FIRST_PCT:
             if (btnType === 'key_pct') {
@@ -271,16 +292,22 @@ buttons.addEventListener('click', e => {
             }
             break;
         case states.SECOND_PCT:
+            if (btnType === 'number') {
+                disp = btnValue;
+                updateDisplay(disp);
+                if (btnValue === '0') return;
+                currentState = states.FIRST_NUM;
+            }
             if (btnType === 'operator') {
                 operatorKey = btnValue;
                 firstOperand = disp;
                 updateDisplay(disp);
                 currentState = states.OP;
             }
-            if (btnType === 'key_eq') {
-                disp = operations[operatorKey](disp, secondOperand);
+            if (btnType === 'key_dot') {
+                disp = '0.';
                 updateDisplay(disp);
-                currentState = states.EQUALS;
+                currentState = states.FIRST_NUM_WITH_DECIMAL;
             }
             break;
         default:

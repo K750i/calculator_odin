@@ -31,7 +31,7 @@ const updateSecondaryDisplay = (first, operator, second) => {
     first = first ?? '';
     operator = symbols[operator] ?? '';
     second = second ?? '';
-    secondDisplay.textContent = `${first} ${operator} ${second}`;
+    secondDisplay.textContent = `${first} ${operator} ${second} ${currentState === 7 ? '=' : ''}`;
 };
 const reset = () => {
     currentState = states.START;
@@ -67,6 +67,7 @@ buttons.addEventListener('click', e => {
     }
 
     if (btnType === 'key_neg') {
+        if (currentState === states.OP) return;
         disp = operations[btnValue](disp.toString());
         updateDisplay(disp);
         return;

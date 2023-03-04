@@ -1,14 +1,8 @@
 'use strict';
 const buttons = document.querySelector('.button-wrapper');
 const display = document.querySelector('.main-display');
-const operations = {
-    add: (n1, n2) => parseFloat(n1) + parseFloat(n2),
-    sub: (n1, n2) => parseFloat(n1) - parseFloat(n2),
-    mul: (n1, n2) => parseFloat(n1) * parseFloat(n2),
-    div: (n1, n2) => parseFloat(n1) / parseFloat(n2),
-    neg: n => n.startsWith('-') ? n.slice(1) : '-' + n,
-};
-const updateDisplay = value => display.textContent = value;
+const secondDisplay = document.querySelector('.secondary-display');
+const regex = /\.?0+$/;
 const states = {
     START: 1,   // initial state where no key is pressed
     FIRST_NUM: 2,   // number w/o decimal is displayed
@@ -20,6 +14,25 @@ const states = {
     FIRST_PCT: 8,    // pct key pressed before operator keys
     SECOND_PCT: 9,  // pct key pressed after operator keys
 };
+const symbols = { add: '+', sub: '-', mul: '×', div: '÷' };
+const operations = {
+    add: (n1, n2) => parseFloat(n1) + parseFloat(n2),
+    sub: (n1, n2) => parseFloat(n1) - parseFloat(n2),
+    mul: (n1, n2) => parseFloat(n1) * parseFloat(n2),
+    div: (n1, n2) => parseFloat(n1) / parseFloat(n2),
+    neg: n => n.startsWith('-') ? n.slice(1) : '-' + n,
+};
+const calculate = (operation, n1, n2) => {
+    const result = operation(n1, n2).toPrecision(12);
+    return result.replace(regex, '');
+};
+const updateDisplay = value => display.textContent = value;
+const updateSecondaryDisplay = (first, operator, second) => {
+    first = first ?? '';
+    operator = symbols[operator] ?? '';
+    second = second ?? '';
+    secondDisplay.textContent = `${first} ${operator} ${second}`;
+};
 const reset = () => {
     currentState = states.START;
     disp = 0;
@@ -27,6 +40,7 @@ const reset = () => {
     secondOperand = null;
     operatorKey = null;
     updateDisplay(disp);
+    updateSecondaryDisplay();
 };
 const deleteNum = state => {
     disp = disp.toString();
@@ -135,6 +149,7 @@ buttons.addEventListener('click', e => {
                 currentState = states.SECOND_NUM;
             }
             if (btnType === 'operator') {
+                secondOperand = null;
                 operatorKey = btnValue;
             }
             if (btnType === 'key_dot') {
@@ -143,7 +158,8 @@ buttons.addEventListener('click', e => {
                 currentState = states.SECOND_NUM_WITH_DECIMAL;
             }
             if (btnType === 'key_eq') {
-                disp = operations[operatorKey](disp, firstOperand);
+                secondOperand = disp;
+                disp = calculate(operations[operatorKey], disp, firstOperand);
                 updateDisplay(disp);
                 currentState = states.EQUALS;
             }
@@ -154,7 +170,7 @@ buttons.addEventListener('click', e => {
                 updateDisplay(disp);
             }
             if (btnType === 'operator') {
-                disp = operations[operatorKey](firstOperand, disp);
+                disp = calculate(operations[operatorKey], firstOperand, disp);
                 updateDisplay(disp);
                 operatorKey = btnValue;
                 firstOperand = disp;
@@ -168,17 +184,17 @@ buttons.addEventListener('click', e => {
             if (btnType === 'key_pct') {
                 if (operatorKey === 'mul' || operatorKey === 'div') {
                     secondOperand = disp / 100;
-                    disp = operations[operatorKey](firstOperand, secondOperand);
+                    disp = calculate(operations[operatorKey], firstOperand, secondOperand);
                 } else {
                     secondOperand = firstOperand * disp / 100;
-                    disp = operations[operatorKey](firstOperand, secondOperand);
+                    disp = calculate(operations[operatorKey], firstOperand, secondOperand);
                 }
                 updateDisplay(disp);
                 currentState = states.SECOND_PCT;
             }
             if (btnType === 'key_eq') {
                 secondOperand = disp;
-                disp = operations[operatorKey](firstOperand, secondOperand);
+                disp = calculate(operations[operatorKey], firstOperand, secondOperand);
                 updateDisplay(disp);
                 currentState = states.EQUALS;
             }
@@ -198,7 +214,7 @@ buttons.addEventListener('click', e => {
                 updateDisplay(disp);
             }
             if (btnType === 'operator') {
-                disp = operations[operatorKey](firstOperand, disp);
+                disp = calculate(operations[operatorKey], firstOperand, disp);
                 updateDisplay(disp);
                 operatorKey = btnValue;
                 firstOperand = disp;
@@ -207,17 +223,17 @@ buttons.addEventListener('click', e => {
             if (btnType === 'key_pct') {
                 if (operatorKey === 'mul' || operatorKey === 'div') {
                     secondOperand = disp / 100;
-                    disp = operations[operatorKey](firstOperand, secondOperand);
+                    disp = calculate(operations[operatorKey], firstOperand, secondOperand);
                 } else {
                     secondOperand = firstOperand * disp / 100;
-                    disp = operations[operatorKey](firstOperand, secondOperand);
+                    disp = calculate(operations[operatorKey], firstOperand, secondOperand);
                 }
                 updateDisplay(disp);
                 currentState = states.SECOND_PCT;
             }
             if (btnType === 'key_eq') {
                 secondOperand = disp;
-                disp = operations[operatorKey](firstOperand, disp);
+                disp = calculate(operations[operatorKey], firstOperand, disp);
                 updateDisplay(disp);
                 currentState = states.EQUALS;
             }
@@ -235,6 +251,9 @@ buttons.addEventListener('click', e => {
             if (btnType === 'number') {
                 disp = btnValue;
                 updateDisplay(disp);
+                firstOperand = null;
+                secondOperand = null;
+                operatorKey = null;
                 if (btnValue === '0') return;
                 currentState = states.FIRST_NUM;
             }
@@ -244,8 +263,8 @@ buttons.addEventListener('click', e => {
                 currentState = states.FIRST_NUM_WITH_DECIMAL;
             }
             if (btnType === 'key_eq') {
-                secondOperand = secondOperand ?? firstOperand;
-                disp = operations[operatorKey](disp, secondOperand);
+                firstOperand = disp;
+                disp = calculate(operations[operatorKey], disp, secondOperand);
                 updateDisplay(disp);
             }
             if (btnType === 'operator') {
@@ -296,7 +315,6 @@ buttons.addEventListener('click', e => {
                 currentState = states.FIRST_NUM_WITH_DECIMAL;
             }
             break;
-        default:
-            break;
     }
+    updateSecondaryDisplay(firstOperand, operatorKey, secondOperand);
 });

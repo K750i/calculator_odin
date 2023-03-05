@@ -1,5 +1,5 @@
 :root {
-    --bgcolor_one: #313E50;
+    --bgcolor_one: #3b4c64;
     --bgcolor_two: #6C6F7F;
     --num_color: #2d2d2d;
     --operator_color: #3A435E;
@@ -74,6 +74,7 @@ body {
 }
 
 .key {
+    cursor: pointer;
     width: 25%;
     border: 1px solid hsla(0, 0%, 27%, 0.4);
     border-radius: 0;
@@ -124,4 +125,17 @@ body {
 
 .key.wide {
     flex-basis: 50%;
+}
+
+footer {
+    position: absolute;
+    bottom: 16px;
+    left: 0;
+    right: 0;
+    text-align: center;
+}
+
+footer img {
+    width: 23px;
+    vertical-align: bottom;
 }

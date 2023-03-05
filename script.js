@@ -339,6 +339,7 @@ buttons.addEventListener('click', e => {
 
 document.addEventListener('keydown', e => {
     if (e.repeat) return;
+    if (e.key === "/") e.preventDefault();
 
     if (e.key === 'Escape') {
         reset();

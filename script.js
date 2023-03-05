@@ -4,6 +4,7 @@ const display = document.querySelector('.main-display');
 const secondDisplay = document.querySelector('.secondary-display');
 const regex = /\.?0+$/;
 const digits = '1234567890';
+const op = '+-*/';
 const states = {
     START: 1,   // initial state where no key is pressed
     FIRST_NUM: 2,   // number w/o decimal is displayed
@@ -86,7 +87,7 @@ const processState = (state, evt) => {
                 updateDisplay(disp);
                 currentState = states.FIRST_NUM_WITH_DECIMAL;
             }
-            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+            if (btnType === 'operator' || op.includes(evt.key)) {
                 operatorKey = symbolFrom[evt.key] ?? btnValue;
                 firstOperand = disp;
                 currentState = states.OP;
@@ -111,7 +112,7 @@ const processState = (state, evt) => {
                 disp += evt.key ?? btnValue;
                 updateDisplay(disp);
             }
-            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+            if (btnType === 'operator' || op.includes(evt.key)) {
                 operatorKey = symbolFrom[evt.key] ?? btnValue;
                 firstOperand = disp;
                 currentState = states.OP;
@@ -138,7 +139,7 @@ const processState = (state, evt) => {
                 if (btnValue === '0' || evt.key === '0') return;
                 currentState = states.SECOND_NUM;
             }
-            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+            if (btnType === 'operator' || op.includes(evt.key)) {
                 secondOperand = null;
                 operatorKey = symbolFrom[evt.key] ?? btnValue;
             }
@@ -159,7 +160,7 @@ const processState = (state, evt) => {
                 disp += evt.key ?? btnValue;
                 updateDisplay(disp);
             }
-            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+            if (btnType === 'operator' || op.includes(evt.key)) {
                 disp = calculate(operations[operatorKey], firstOperand, disp);
                 updateDisplay(disp);
                 operatorKey = symbolFrom[evt.key] ?? btnValue;
@@ -203,7 +204,7 @@ const processState = (state, evt) => {
                 disp += evt.key ?? btnValue;
                 updateDisplay(disp);
             }
-            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+            if (btnType === 'operator' || op.includes(evt.key)) {
                 disp = calculate(operations[operatorKey], firstOperand, disp);
                 updateDisplay(disp);
                 operatorKey = symbolFrom[evt.key] ?? btnValue;
@@ -260,7 +261,7 @@ const processState = (state, evt) => {
                 disp = calculate(operations[operatorKey], disp, secondOperand);
                 updateDisplay(disp);
             }
-            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+            if (btnType === 'operator' || op.includes(evt.key)) {
                 firstOperand = disp;
                 secondOperand = null;
                 operatorKey = symbolFrom[evt.key] ?? btnValue;
@@ -283,7 +284,7 @@ const processState = (state, evt) => {
                 updateDisplay(disp);
                 currentState = states.FIRST_NUM_WITH_DECIMAL;
             }
-            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+            if (btnType === 'operator' || op.includes(evt.key)) {
                 operatorKey = symbolFrom[evt.key] ?? btnValue;
                 firstOperand = disp;
                 currentState = states.OP;
@@ -299,7 +300,7 @@ const processState = (state, evt) => {
                 if (btnValue === '0' || evt.key === '0') return;
                 currentState = states.FIRST_NUM;
             }
-            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+            if (btnType === 'operator' || op.includes(evt.key)) {
                 operatorKey = symbolFrom[evt.key] ?? btnValue;
                 firstOperand = disp;
                 secondOperand = null;
@@ -324,16 +325,14 @@ let secondOperand;
 let operatorKey;
 
 buttons.addEventListener('click', e => {
-    const { type: btnType, value: btnValue } = e.target.dataset;
-
-    if (btnType === 'key_ac') {
+    if (e.target.dataset.type === 'key_ac') {
         reset();
         return;
     }
 
-    if (btnType === 'key_neg') {
+    if (e.target.dataset.type === 'key_neg') {
         if (currentState === states.OP) return;
-        disp = operations[btnValue](disp.toString());
+        disp = operations[e.target.dataset.value](disp.toString());
         updateDisplay(disp);
         return;
     }
@@ -343,9 +342,8 @@ buttons.addEventListener('click', e => {
 });
 
 document.addEventListener('keydown', e => {
-    if (e.repeat) return;
-    if (e.key === '/') e.preventDefault();
-    if (e.key === 'Enter') e.preventDefault();
+    if (e.key !== 'Backspace' && e.repeat) return;
+    if (e.key === '/' || e.key === 'Enter') e.preventDefault();
 
     if (e.key === 'Escape') {
         reset();

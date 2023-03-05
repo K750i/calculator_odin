@@ -3,6 +3,7 @@ const buttons = document.querySelector('.button-wrapper');
 const display = document.querySelector('.main-display');
 const secondDisplay = document.querySelector('.secondary-display');
 const regex = /\.?0+$/;
+const digits = '1234567890';
 const states = {
     START: 1,   // initial state where no key is pressed
     FIRST_NUM: 2,   // number w/o decimal is displayed
@@ -14,7 +15,8 @@ const states = {
     FIRST_PCT: 8,    // pct key pressed before operator keys
     SECOND_PCT: 9,  // pct key pressed after operator keys
 };
-const symbols = { add: '+', sub: '-', mul: '×', div: '÷' };
+const toSymbols = { add: '+', sub: '-', mul: '×', div: '÷' };
+const symbolFrom = { '+': 'add', '-': 'sub', '*': 'mul', '/': 'div' };
 const operations = {
     add: (n1, n2) => parseFloat(n1) + parseFloat(n2),
     sub: (n1, n2) => parseFloat(n1) - parseFloat(n2),
@@ -29,7 +31,7 @@ const calculate = (operation, n1, n2) => {
 const updateDisplay = value => display.textContent = value;
 const updateSecondaryDisplay = (first, operator, second) => {
     first = first ?? '';
-    operator = symbols[operator] ?? '';
+    operator = toSymbols[operator] ?? '';
     second = second ?? '';
     secondDisplay.textContent = `${first} ${operator} ${second} ${currentState === 7 ? '=' : ''}`;
 };
@@ -50,6 +52,264 @@ const deleteNum = state => {
     }
     else {
         disp = disp.slice(0, -1);
+    }
+};
+const processState = (state, evt) => {
+    const { type: btnType, value: btnValue } = evt.target.dataset;
+
+    switch (state) {
+        case states.START:
+            if (btnType === 'number' || digits.includes(evt.key)) {
+                if (btnValue === '0' || evt.key === '0') return;
+                disp = btnValue ?? evt.key;
+                updateDisplay(disp);
+                currentState = states.FIRST_NUM;
+            }
+            if (btnType === 'key_dot' || evt.key === '.') {
+                disp = '0.';
+                updateDisplay(disp);
+                currentState = states.FIRST_NUM_WITH_DECIMAL;
+            }
+            break;
+        case states.FIRST_NUM:
+            if (btnType === 'number' || digits.includes(evt.key)) {
+                disp += btnValue ?? evt.key;
+                updateDisplay(disp);
+            }
+            if (btnType === 'key_dot' || evt.key === '.') {
+                disp += '.';
+                updateDisplay(disp);
+                currentState = states.FIRST_NUM_WITH_DECIMAL;
+            }
+            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+                operatorKey = btnValue ?? symbolFrom[evt.key];
+                firstOperand = disp;
+                currentState = states.OP;
+            }
+            if (btnType === 'key_pct' || evt.key === '%') {
+                disp = disp / 100;
+                updateDisplay(disp);
+                currentState = states.FIRST_PCT;
+            }
+            if (btnType === 'key_ce') {
+                disp = 0;
+                updateDisplay(disp);
+                currentState = states.START;
+            }
+            if (btnType === 'key_del' || evt.key === 'Backspace') {
+                deleteNum(states.START);
+                updateDisplay(disp);
+            }
+            break;
+        case states.FIRST_NUM_WITH_DECIMAL:
+            if (btnType === 'number' || digits.includes(evt.key)) {
+                disp += btnValue ?? evt.key;
+                updateDisplay(disp);
+            }
+            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+                operatorKey = btnValue ?? symbolFrom[evt.key];
+                firstOperand = disp;
+                currentState = states.OP;
+            }
+            if (btnType === 'key_pct' || evt.key === '%') {
+                disp = disp / 100;
+                updateDisplay(disp);
+                currentState = states.FIRST_PCT;
+            }
+            if (btnType === 'key_ce') {
+                disp = 0;
+                updateDisplay(disp);
+                currentState = states.START;
+            }
+            if (btnType === 'key_del' || evt.key === 'Backspace') {
+                deleteNum(states.START);
+                updateDisplay(disp);
+            }
+            break;
+        case states.OP:
+            if (btnType === 'number' || digits.includes(evt.key)) {
+                disp = btnValue ?? evt.key;
+                updateDisplay(disp);
+                if (btnValue === '0' || evt.key === '0') return;
+                currentState = states.SECOND_NUM;
+            }
+            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+                secondOperand = null;
+                operatorKey = btnValue ?? symbolFrom[evt.key];
+            }
+            if (btnType === 'key_dot' || evt.key === '.') {
+                disp = '0.';
+                updateDisplay(disp);
+                currentState = states.SECOND_NUM_WITH_DECIMAL;
+            }
+            if (btnType === 'key_eq' || evt.key === 'Enter') {
+                secondOperand = disp;
+                disp = calculate(operations[operatorKey], disp, firstOperand);
+                updateDisplay(disp);
+                currentState = states.EQUALS;
+            }
+            break;
+        case states.SECOND_NUM:
+            if (btnType === 'number' || digits.includes(evt.key)) {
+                disp += btnValue ?? evt.key;
+                updateDisplay(disp);
+            }
+            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+                disp = calculate(operations[operatorKey], firstOperand, disp);
+                updateDisplay(disp);
+                operatorKey = btnValue ?? symbolFrom[evt.key];
+                firstOperand = disp;
+                currentState = states.OP;
+            }
+            if (btnType === 'key_dot' || evt.key === '.') {
+                disp += '.';
+                updateDisplay(disp);
+                currentState = states.SECOND_NUM_WITH_DECIMAL;
+            }
+            if (btnType === 'key_pct' || evt.key === '%') {
+                if (operatorKey === 'mul' || operatorKey === 'div') {
+                    secondOperand = disp / 100;
+                    disp = calculate(operations[operatorKey], firstOperand, secondOperand);
+                } else {
+                    secondOperand = firstOperand * disp / 100;
+                    disp = calculate(operations[operatorKey], firstOperand, secondOperand);
+                }
+                updateDisplay(disp);
+                currentState = states.SECOND_PCT;
+            }
+            if (btnType === 'key_eq' || evt.key === 'Enter') {
+                secondOperand = disp;
+                disp = calculate(operations[operatorKey], firstOperand, secondOperand);
+                updateDisplay(disp);
+                currentState = states.EQUALS;
+            }
+            if (btnType === 'key_ce') {
+                disp = 0;
+                updateDisplay(disp);
+                currentState = states.OP;
+            }
+            if (btnType === 'key_del' || evt.key === 'Backspace') {
+                deleteNum(states.OP);
+                updateDisplay(disp);
+            }
+            break;
+        case states.SECOND_NUM_WITH_DECIMAL:
+            if (btnType === 'number' || digits.includes(evt.key)) {
+                disp += btnValue ?? evt.key;
+                updateDisplay(disp);
+            }
+            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+                disp = calculate(operations[operatorKey], firstOperand, disp);
+                updateDisplay(disp);
+                operatorKey = btnValue ?? symbolFrom[evt.key];
+                firstOperand = disp;
+                currentState = states.OP;
+            }
+            if (btnType === 'key_pct' || evt.key === '%') {
+                if (operatorKey === 'mul' || operatorKey === 'div') {
+                    secondOperand = disp / 100;
+                    disp = calculate(operations[operatorKey], firstOperand, secondOperand);
+                } else {
+                    secondOperand = firstOperand * disp / 100;
+                    disp = calculate(operations[operatorKey], firstOperand, secondOperand);
+                }
+                updateDisplay(disp);
+                currentState = states.SECOND_PCT;
+            }
+            if (btnType === 'key_eq' || evt.key === 'Enter') {
+                secondOperand = disp;
+                disp = calculate(operations[operatorKey], firstOperand, disp);
+                updateDisplay(disp);
+                currentState = states.EQUALS;
+            }
+            if (btnType === 'key_ce') {
+                disp = 0;
+                updateDisplay(disp);
+                currentState = states.OP;
+            }
+            if (btnType === 'key_del' || evt.key === 'Backspace') {
+                deleteNum(states.OP);
+                updateDisplay(disp);
+            }
+            break;
+        case states.EQUALS:
+            if (btnType === 'number' || digits.includes(evt.key)) {
+                disp = btnValue ?? evt.key;
+                updateDisplay(disp);
+                firstOperand = null;
+                secondOperand = null;
+                operatorKey = null;
+                if (btnValue === '0' || evt.key === '0') return;
+                currentState = states.FIRST_NUM;
+            }
+            if (btnType === 'key_dot' || evt.key === '.') {
+                disp = '0.';
+                updateDisplay(disp);
+                firstOperand = null;
+                secondOperand = null;
+                operatorKey = null;
+                currentState = states.FIRST_NUM_WITH_DECIMAL;
+            }
+            if (btnType === 'key_eq' || evt.key === 'Enter') {
+                firstOperand = disp;
+                disp = calculate(operations[operatorKey], disp, secondOperand);
+                updateDisplay(disp);
+            }
+            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+                firstOperand = disp;
+                secondOperand = null;
+                operatorKey = btnValue ?? symbolFrom[evt.key];
+                currentState = states.OP;
+            }
+            break;
+        case states.FIRST_PCT:
+            if (btnType === 'key_pct' || evt.key === '%') {
+                disp = disp / 100;
+                updateDisplay(disp);
+            }
+            if (btnType === 'number' || digits.includes(evt.key)) {
+                disp = btnValue ?? evt.key;
+                updateDisplay(disp);
+                if (btnValue === '0' || evt.key === '0') return;
+                currentState = states.FIRST_NUM;
+            }
+            if (btnType === 'key_dot' || evt.key === '.') {
+                disp = '0.';
+                updateDisplay(disp);
+                currentState = states.FIRST_NUM_WITH_DECIMAL;
+            }
+            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+                operatorKey = btnValue ?? symbolFrom[evt.key];;
+                firstOperand = disp;
+                currentState = states.OP;
+            }
+            break;
+        case states.SECOND_PCT:
+            if (btnType === 'number' || digits.includes(evt.key)) {
+                disp = btnValue ?? evt.key;
+                updateDisplay(disp);
+                firstOperand = null;
+                secondOperand = null;
+                operatorKey = null;
+                if (btnValue === '0' || evt.key === '0') return;
+                currentState = states.FIRST_NUM;
+            }
+            if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
+                operatorKey = btnValue ?? symbolFrom[evt.key];;
+                firstOperand = disp;
+                secondOperand = null;
+                updateDisplay(disp);
+                currentState = states.OP;
+            }
+            if (btnType === 'key_dot' || evt.key === '.') {
+                disp = '0.';
+                updateDisplay(disp);
+                firstOperand = null;
+                secondOperand = null;
+                operatorKey = null;
+                currentState = states.FIRST_NUM_WITH_DECIMAL;
+            }
+            break;
     }
 };
 let currentState = states.START;
@@ -73,252 +333,18 @@ buttons.addEventListener('click', e => {
         return;
     }
 
-    switch (currentState) {
-        case states.START:
-            if (btnType === 'number') {
-                if (btnValue === '0') return;
-                disp = btnValue;
-                updateDisplay(disp);
-                currentState = states.FIRST_NUM;
-            }
-            if (btnType === 'key_dot') {
-                disp = '0.';
-                updateDisplay(disp);
-                currentState = states.FIRST_NUM_WITH_DECIMAL;
-            }
-            break;
-        case states.FIRST_NUM:
-            if (btnType === 'number') {
-                disp += btnValue;
-                updateDisplay(disp);
-            }
-            if (btnType === 'key_dot') {
-                disp += '.';
-                updateDisplay(disp);
-                currentState = states.FIRST_NUM_WITH_DECIMAL;
-            }
-            if (btnType === 'operator') {
-                operatorKey = btnValue;
-                firstOperand = disp;
-                currentState = states.OP;
-            }
-            if (btnType === 'key_pct') {
-                disp = disp / 100;
-                updateDisplay(disp);
-                currentState = states.FIRST_PCT;
-            }
-            if (btnType === 'key_ce') {
-                disp = 0;
-                updateDisplay(disp);
-                currentState = states.START;
-            }
-            if (btnType === 'key_del') {
-                deleteNum(states.START);
-                updateDisplay(disp);
-            }
-            break;
-        case states.FIRST_NUM_WITH_DECIMAL:
-            if (btnType === 'number') {
-                disp += btnValue;
-                updateDisplay(disp);
-            }
-            if (btnType === 'operator') {
-                operatorKey = btnValue;
-                firstOperand = disp;
-                currentState = states.OP;
-            }
-            if (btnType === 'key_pct') {
-                disp = disp / 100;
-                updateDisplay(disp);
-                currentState = states.FIRST_PCT;
-            }
-            if (btnType === 'key_ce') {
-                disp = 0;
-                updateDisplay(disp);
-                currentState = states.START;
-            }
-            if (btnType === 'key_del') {
-                deleteNum(states.START);
-                updateDisplay(disp);
-            }
-            break;
-        case states.OP:
-            if (btnType === 'number') {
-                disp = btnValue;
-                updateDisplay(disp);
-                if (btnValue === '0') return;
-                currentState = states.SECOND_NUM;
-            }
-            if (btnType === 'operator') {
-                secondOperand = null;
-                operatorKey = btnValue;
-            }
-            if (btnType === 'key_dot') {
-                disp = '0.';
-                updateDisplay(disp);
-                currentState = states.SECOND_NUM_WITH_DECIMAL;
-            }
-            if (btnType === 'key_eq') {
-                secondOperand = disp;
-                disp = calculate(operations[operatorKey], disp, firstOperand);
-                updateDisplay(disp);
-                currentState = states.EQUALS;
-            }
-            break;
-        case states.SECOND_NUM:
-            if (btnType === 'number') {
-                disp += btnValue;
-                updateDisplay(disp);
-            }
-            if (btnType === 'operator') {
-                disp = calculate(operations[operatorKey], firstOperand, disp);
-                updateDisplay(disp);
-                operatorKey = btnValue;
-                firstOperand = disp;
-                currentState = states.OP;
-            }
-            if (btnType === 'key_dot') {
-                disp += '.';
-                updateDisplay(disp);
-                currentState = states.SECOND_NUM_WITH_DECIMAL;
-            }
-            if (btnType === 'key_pct') {
-                if (operatorKey === 'mul' || operatorKey === 'div') {
-                    secondOperand = disp / 100;
-                    disp = calculate(operations[operatorKey], firstOperand, secondOperand);
-                } else {
-                    secondOperand = firstOperand * disp / 100;
-                    disp = calculate(operations[operatorKey], firstOperand, secondOperand);
-                }
-                updateDisplay(disp);
-                currentState = states.SECOND_PCT;
-            }
-            if (btnType === 'key_eq') {
-                secondOperand = disp;
-                disp = calculate(operations[operatorKey], firstOperand, secondOperand);
-                updateDisplay(disp);
-                currentState = states.EQUALS;
-            }
-            if (btnType === 'key_ce') {
-                disp = 0;
-                updateDisplay(disp);
-                currentState = states.OP;
-            }
-            if (btnType === 'key_del') {
-                deleteNum(states.OP);
-                updateDisplay(disp);
-            }
-            break;
-        case states.SECOND_NUM_WITH_DECIMAL:
-            if (btnType === 'number') {
-                disp += btnValue;
-                updateDisplay(disp);
-            }
-            if (btnType === 'operator') {
-                disp = calculate(operations[operatorKey], firstOperand, disp);
-                updateDisplay(disp);
-                operatorKey = btnValue;
-                firstOperand = disp;
-                currentState = states.OP;
-            }
-            if (btnType === 'key_pct') {
-                if (operatorKey === 'mul' || operatorKey === 'div') {
-                    secondOperand = disp / 100;
-                    disp = calculate(operations[operatorKey], firstOperand, secondOperand);
-                } else {
-                    secondOperand = firstOperand * disp / 100;
-                    disp = calculate(operations[operatorKey], firstOperand, secondOperand);
-                }
-                updateDisplay(disp);
-                currentState = states.SECOND_PCT;
-            }
-            if (btnType === 'key_eq') {
-                secondOperand = disp;
-                disp = calculate(operations[operatorKey], firstOperand, disp);
-                updateDisplay(disp);
-                currentState = states.EQUALS;
-            }
-            if (btnType === 'key_ce') {
-                disp = 0;
-                updateDisplay(disp);
-                currentState = states.OP;
-            }
-            if (btnType === 'key_del') {
-                deleteNum(states.OP);
-                updateDisplay(disp);
-            }
-            break;
-        case states.EQUALS:
-            if (btnType === 'number') {
-                disp = btnValue;
-                updateDisplay(disp);
-                firstOperand = null;
-                secondOperand = null;
-                operatorKey = null;
-                if (btnValue === '0') return;
-                currentState = states.FIRST_NUM;
-            }
-            if (btnType === 'key_dot') {
-                disp = '0.';
-                updateDisplay(disp);
-                firstOperand = null;
-                secondOperand = null;
-                operatorKey = null;
-                currentState = states.FIRST_NUM_WITH_DECIMAL;
-            }
-            if (btnType === 'key_eq') {
-                firstOperand = disp;
-                disp = calculate(operations[operatorKey], disp, secondOperand);
-                updateDisplay(disp);
-            }
-            if (btnType === 'operator') {
-                firstOperand = disp;
-                secondOperand = null;
-                operatorKey = btnValue;
-                currentState = states.OP;
-            }
-            break;
-        case states.FIRST_PCT:
-            if (btnType === 'key_pct') {
-                disp = disp / 100;
-                updateDisplay(disp);
-            }
-            if (btnType === 'number') {
-                disp = btnValue;
-                updateDisplay(disp);
-                if (btnValue === '0') return;
-                currentState = states.FIRST_NUM;
-            }
-            if (btnType === 'key_dot') {
-                disp = '0.';
-                updateDisplay(disp);
-                currentState = states.FIRST_NUM_WITH_DECIMAL;
-            }
-            if (btnType === 'operator') {
-                operatorKey = btnValue;
-                firstOperand = disp;
-                currentState = states.OP;
-            }
-            break;
-        case states.SECOND_PCT:
-            if (btnType === 'number') {
-                disp = btnValue;
-                updateDisplay(disp);
-                if (btnValue === '0') return;
-                currentState = states.FIRST_NUM;
-            }
-            if (btnType === 'operator') {
-                operatorKey = btnValue;
-                firstOperand = disp;
-                updateDisplay(disp);
-                currentState = states.OP;
-            }
-            if (btnType === 'key_dot') {
-                disp = '0.';
-                updateDisplay(disp);
-                currentState = states.FIRST_NUM_WITH_DECIMAL;
-            }
-            break;
+    processState(currentState, e);
+    updateSecondaryDisplay(firstOperand, operatorKey, secondOperand);
+});
+
+document.addEventListener('keydown', e => {
+    if (e.repeat) return;
+
+    if (e.key === 'Escape') {
+        reset();
+        return;
     }
+
+    processState(currentState, e);
     updateSecondaryDisplay(firstOperand, operatorKey, secondOperand);
 });

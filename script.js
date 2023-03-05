@@ -55,13 +55,18 @@ const deleteNum = state => {
     }
 };
 const processState = (state, evt) => {
-    const { type: btnType, value: btnValue } = evt.target.dataset;
+    let btnType = null;
+    let btnValue = null;
+
+    if (evt.type === 'click') {
+        ({ type: btnType, value: btnValue } = evt.target.dataset);
+    }
 
     switch (state) {
         case states.START:
             if (btnType === 'number' || digits.includes(evt.key)) {
                 if (btnValue === '0' || evt.key === '0') return;
-                disp = btnValue ?? evt.key;
+                disp = evt.key ?? btnValue;
                 updateDisplay(disp);
                 currentState = states.FIRST_NUM;
             }
@@ -73,7 +78,7 @@ const processState = (state, evt) => {
             break;
         case states.FIRST_NUM:
             if (btnType === 'number' || digits.includes(evt.key)) {
-                disp += btnValue ?? evt.key;
+                disp += evt.key ?? btnValue;
                 updateDisplay(disp);
             }
             if (btnType === 'key_dot' || evt.key === '.') {
@@ -82,7 +87,7 @@ const processState = (state, evt) => {
                 currentState = states.FIRST_NUM_WITH_DECIMAL;
             }
             if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
-                operatorKey = btnValue ?? symbolFrom[evt.key];
+                operatorKey = symbolFrom[evt.key] ?? btnValue;
                 firstOperand = disp;
                 currentState = states.OP;
             }
@@ -103,11 +108,11 @@ const processState = (state, evt) => {
             break;
         case states.FIRST_NUM_WITH_DECIMAL:
             if (btnType === 'number' || digits.includes(evt.key)) {
-                disp += btnValue ?? evt.key;
+                disp += evt.key ?? btnValue;
                 updateDisplay(disp);
             }
             if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
-                operatorKey = btnValue ?? symbolFrom[evt.key];
+                operatorKey = symbolFrom[evt.key] ?? btnValue;
                 firstOperand = disp;
                 currentState = states.OP;
             }
@@ -128,14 +133,14 @@ const processState = (state, evt) => {
             break;
         case states.OP:
             if (btnType === 'number' || digits.includes(evt.key)) {
-                disp = btnValue ?? evt.key;
+                disp = evt.key ?? btnValue;
                 updateDisplay(disp);
                 if (btnValue === '0' || evt.key === '0') return;
                 currentState = states.SECOND_NUM;
             }
             if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
                 secondOperand = null;
-                operatorKey = btnValue ?? symbolFrom[evt.key];
+                operatorKey = symbolFrom[evt.key] ?? btnValue;
             }
             if (btnType === 'key_dot' || evt.key === '.') {
                 disp = '0.';
@@ -151,13 +156,13 @@ const processState = (state, evt) => {
             break;
         case states.SECOND_NUM:
             if (btnType === 'number' || digits.includes(evt.key)) {
-                disp += btnValue ?? evt.key;
+                disp += evt.key ?? btnValue;
                 updateDisplay(disp);
             }
             if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
                 disp = calculate(operations[operatorKey], firstOperand, disp);
                 updateDisplay(disp);
-                operatorKey = btnValue ?? symbolFrom[evt.key];
+                operatorKey = symbolFrom[evt.key] ?? btnValue;
                 firstOperand = disp;
                 currentState = states.OP;
             }
@@ -195,13 +200,13 @@ const processState = (state, evt) => {
             break;
         case states.SECOND_NUM_WITH_DECIMAL:
             if (btnType === 'number' || digits.includes(evt.key)) {
-                disp += btnValue ?? evt.key;
+                disp += evt.key ?? btnValue;
                 updateDisplay(disp);
             }
             if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
                 disp = calculate(operations[operatorKey], firstOperand, disp);
                 updateDisplay(disp);
-                operatorKey = btnValue ?? symbolFrom[evt.key];
+                operatorKey = symbolFrom[evt.key] ?? btnValue;
                 firstOperand = disp;
                 currentState = states.OP;
             }
@@ -234,7 +239,7 @@ const processState = (state, evt) => {
             break;
         case states.EQUALS:
             if (btnType === 'number' || digits.includes(evt.key)) {
-                disp = btnValue ?? evt.key;
+                disp = evt.key ?? btnValue;
                 updateDisplay(disp);
                 firstOperand = null;
                 secondOperand = null;
@@ -258,7 +263,7 @@ const processState = (state, evt) => {
             if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
                 firstOperand = disp;
                 secondOperand = null;
-                operatorKey = btnValue ?? symbolFrom[evt.key];
+                operatorKey = symbolFrom[evt.key] ?? btnValue;
                 currentState = states.OP;
             }
             break;
@@ -268,7 +273,7 @@ const processState = (state, evt) => {
                 updateDisplay(disp);
             }
             if (btnType === 'number' || digits.includes(evt.key)) {
-                disp = btnValue ?? evt.key;
+                disp = evt.key ?? btnValue;
                 updateDisplay(disp);
                 if (btnValue === '0' || evt.key === '0') return;
                 currentState = states.FIRST_NUM;
@@ -279,14 +284,14 @@ const processState = (state, evt) => {
                 currentState = states.FIRST_NUM_WITH_DECIMAL;
             }
             if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
-                operatorKey = btnValue ?? symbolFrom[evt.key];;
+                operatorKey = symbolFrom[evt.key] ?? btnValue;
                 firstOperand = disp;
                 currentState = states.OP;
             }
             break;
         case states.SECOND_PCT:
             if (btnType === 'number' || digits.includes(evt.key)) {
-                disp = btnValue ?? evt.key;
+                disp = evt.key ?? btnValue;
                 updateDisplay(disp);
                 firstOperand = null;
                 secondOperand = null;
@@ -295,7 +300,7 @@ const processState = (state, evt) => {
                 currentState = states.FIRST_NUM;
             }
             if (btnType === 'operator' || '+-*/'.includes(evt.key)) {
-                operatorKey = btnValue ?? symbolFrom[evt.key];;
+                operatorKey = symbolFrom[evt.key] ?? btnValue;
                 firstOperand = disp;
                 secondOperand = null;
                 updateDisplay(disp);
@@ -339,7 +344,8 @@ buttons.addEventListener('click', e => {
 
 document.addEventListener('keydown', e => {
     if (e.repeat) return;
-    if (e.key === "/") e.preventDefault();
+    if (e.key === '/') e.preventDefault();
+    if (e.key === 'Enter') e.preventDefault();
 
     if (e.key === 'Escape') {
         reset();

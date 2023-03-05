@@ -261,6 +261,9 @@ buttons.addEventListener('click', e => {
             if (btnType === 'key_dot') {
                 disp = '0.';
                 updateDisplay(disp);
+                firstOperand = null;
+                secondOperand = null;
+                operatorKey = null;
                 currentState = states.FIRST_NUM_WITH_DECIMAL;
             }
             if (btnType === 'key_eq') {

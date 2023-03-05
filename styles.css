@@ -1,10 +1,11 @@
 :root {
-    --bgcolor_one: #c23946;
-    --bgcolor_two: #f08d40;
+    --bgcolor_one: #313E50;
+    --bgcolor_two: #6C6F7F;
     --num_color: #2d2d2d;
-    --operator_color: #c23946;
-    --key_color: #222222;
+    --operator_color: #3A435E;
+    --key_color: #252d34;
     --eq_key_color: #f18e40;
+    --font_family: Assistant, Roboto, sans-serif;
 }
 
 html {
@@ -27,7 +28,7 @@ button {
 
 body {
     background: linear-gradient(to bottom right, var(--bgcolor_one), var(--bgcolor_two));
-    font-family: Roboto, sans-serif;
+    font-family: var(--font_family);
 }
 
 .main-wrapper {
@@ -77,25 +78,48 @@ body {
     border: 1px solid hsla(0, 0%, 27%, 0.4);
     border-radius: 0;
     color: white;
-    font-family: Roboto, sans-serif;
+    font-family: var(--font_family);
     font-size: 1.5rem;
     flex: 1 0 auto;
 }
 
 .key.number {
     background: var(--num_color);
+    font-weight: 200;
+}
+
+.key.number:hover {
+    background: #3d3d3d;
 }
 
 .key.operator {
     background: var(--operator_color);
+    font-weight: 700;
+}
+
+.key.operator:hover {
+    background: #414b69;
 }
 
 .key.func {
     background: var(--key_color);
 }
 
+.key.func:hover {
+    background: #2d3740;
+}
+
 .key.equal {
     background: var(--eq_key_color);
+    font-weight: 700;
+}
+
+.key.equal:hover {
+    background: #dd7d33;
+}
+
+.button-wrapper .key:active {
+    background: black;
 }
 
 .key.wide {

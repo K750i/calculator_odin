@@ -79,7 +79,13 @@ const processState = (state, evt) => {
             break;
         case states.FIRST_NUM:
             if (btnType === 'number' || digits.includes(evt.key)) {
-                disp += evt.key ?? btnValue;
+                if (disp.startsWith('0')) {
+                    if (btnValue !== '0' || evt.key !== '0') {
+                        disp = evt.key ?? btnValue;
+                    }
+                } else {
+                    disp += evt.key ?? btnValue;
+                }
                 updateDisplay(disp);
             }
             if (btnType === 'key_dot' || evt.key === '.') {
@@ -136,7 +142,6 @@ const processState = (state, evt) => {
             if (btnType === 'number' || digits.includes(evt.key)) {
                 disp = evt.key ?? btnValue;
                 updateDisplay(disp);
-                if (btnValue === '0' || evt.key === '0') return;
                 currentState = states.SECOND_NUM;
             }
             if (btnType === 'operator' || op.includes(evt.key)) {
@@ -157,7 +162,13 @@ const processState = (state, evt) => {
             break;
         case states.SECOND_NUM:
             if (btnType === 'number' || digits.includes(evt.key)) {
-                disp += evt.key ?? btnValue;
+                if (disp.startsWith('0')) {
+                    if (btnValue !== '0' || evt.key !== '0') {
+                        disp = evt.key ?? btnValue;
+                    }
+                } else {
+                    disp += evt.key ?? btnValue;
+                }
                 updateDisplay(disp);
             }
             if (btnType === 'operator' || op.includes(evt.key)) {
@@ -245,7 +256,6 @@ const processState = (state, evt) => {
                 firstOperand = null;
                 secondOperand = null;
                 operatorKey = null;
-                if (btnValue === '0' || evt.key === '0') return;
                 currentState = states.FIRST_NUM;
             }
             if (btnType === 'key_dot' || evt.key === '.') {
@@ -276,7 +286,6 @@ const processState = (state, evt) => {
             if (btnType === 'number' || digits.includes(evt.key)) {
                 disp = evt.key ?? btnValue;
                 updateDisplay(disp);
-                if (btnValue === '0' || evt.key === '0') return;
                 currentState = states.FIRST_NUM;
             }
             if (btnType === 'key_dot' || evt.key === '.') {
@@ -297,7 +306,6 @@ const processState = (state, evt) => {
                 firstOperand = null;
                 secondOperand = null;
                 operatorKey = null;
-                if (btnValue === '0' || evt.key === '0') return;
                 currentState = states.FIRST_NUM;
             }
             if (btnType === 'operator' || op.includes(evt.key)) {

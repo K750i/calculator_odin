@@ -1,5 +1,6 @@
 'use strict';
 const buttons = document.querySelector('.button-wrapper');
+const optButtons = document.querySelectorAll('button.opt');
 const display = document.querySelector('.main-display');
 const secondDisplay = document.querySelector('.secondary-display');
 const regex = /\.?0+$/;
@@ -15,6 +16,7 @@ const states = {
     EQUALS: 7,   // equal key is pressed
     FIRST_PCT: 8,    // pct key pressed before operator keys
     SECOND_PCT: 9,  // pct key pressed after operator keys
+    ERROR: 10,  // divide by zero
 };
 const toSymbols = { add: '+', sub: '-', mul: '×', div: '÷' };
 const symbolFrom = { '+': 'add', '-': 'sub', '*': 'mul', '/': 'div' };
@@ -54,6 +56,18 @@ const deleteNum = state => {
     else {
         disp = disp.slice(0, -1);
     }
+};
+const isDivideByZero = () => operatorKey === 'div' && parseInt(disp) === 0;
+const haltOperation = () => {
+    display.classList.add('error');
+    display.textContent = 'Cannot divide by zero';
+    secondDisplay.textContent = '';
+    optButtons.forEach(btn => btn.setAttribute('disabled', ''));
+};
+const resumeOperation = () => {
+    display.classList.remove('error');
+    optButtons.forEach(btn => btn.removeAttribute('disabled'));
+    reset();
 };
 const processState = (state, evt) => {
     let btnType = null;
@@ -172,6 +186,11 @@ const processState = (state, evt) => {
                 updateDisplay(disp);
             }
             if (btnType === 'operator' || op.includes(evt.key)) {
+                if (isDivideByZero()) {
+                    haltOperation();
+                    currentState = states.ERROR;
+                    return;
+                }
                 disp = calculate(operations[operatorKey], firstOperand, disp);
                 updateDisplay(disp);
                 operatorKey = symbolFrom[evt.key] ?? btnValue;
@@ -195,6 +214,11 @@ const processState = (state, evt) => {
                 currentState = states.SECOND_PCT;
             }
             if (btnType === 'key_eq' || evt.key === 'Enter') {
+                if (isDivideByZero()) {
+                    haltOperation();
+                    currentState = states.ERROR;
+                    return;
+                }
                 secondOperand = disp;
                 disp = calculate(operations[operatorKey], firstOperand, secondOperand);
                 updateDisplay(disp);
@@ -216,6 +240,11 @@ const processState = (state, evt) => {
                 updateDisplay(disp);
             }
             if (btnType === 'operator' || op.includes(evt.key)) {
+                if (isDivideByZero()) {
+                    haltOperation();
+                    currentState = states.ERROR;
+                    return;
+                }
                 disp = calculate(operations[operatorKey], firstOperand, disp);
                 updateDisplay(disp);
                 operatorKey = symbolFrom[evt.key] ?? btnValue;
@@ -234,6 +263,11 @@ const processState = (state, evt) => {
                 currentState = states.SECOND_PCT;
             }
             if (btnType === 'key_eq' || evt.key === 'Enter') {
+                if (isDivideByZero()) {
+                    haltOperation();
+                    currentState = states.ERROR;
+                    return;
+                }
                 secondOperand = disp;
                 disp = calculate(operations[operatorKey], firstOperand, disp);
                 updateDisplay(disp);
@@ -324,6 +358,24 @@ const processState = (state, evt) => {
                 currentState = states.FIRST_NUM_WITH_DECIMAL;
             }
             break;
+        case states.ERROR:
+            if (btnType === 'key_ac') {
+                resumeOperation();
+                return;
+            }
+            if (btnType === 'number' || digits.includes(evt.key)) {
+                resumeOperation();
+                disp = evt.key ?? btnValue;
+                updateDisplay(disp);
+                currentState = states.FIRST_NUM;
+            }
+            if (btnType === 'key_dot' || evt.key === '.') {
+                resumeOperation();
+                disp = '0.';
+                updateDisplay(disp);
+                currentState = states.FIRST_NUM_WITH_DECIMAL;
+            }
+            break;
     }
 };
 let currentState = states.START;
@@ -334,7 +386,7 @@ let operatorKey;
 
 buttons.addEventListener('click', e => {
     if (e.target.dataset.type === 'key_ac') {
-        reset();
+        resumeOperation();
         return;
     }
 
@@ -346,7 +398,9 @@ buttons.addEventListener('click', e => {
     }
 
     processState(currentState, e);
-    updateSecondaryDisplay(firstOperand, operatorKey, secondOperand);
+    if (currentState !== states.ERROR) {
+        updateSecondaryDisplay(firstOperand, operatorKey, secondOperand);
+    }
 });
 
 document.addEventListener('keydown', e => {
@@ -354,10 +408,12 @@ document.addEventListener('keydown', e => {
     if (e.key === '/' || e.key === 'Enter') e.preventDefault();
 
     if (e.key === 'Escape') {
-        reset();
+        resumeOperation();
         return;
     }
 
     processState(currentState, e);
-    updateSecondaryDisplay(firstOperand, operatorKey, secondOperand);
+    if (currentState !== states.ERROR) {
+        updateSecondaryDisplay(firstOperand, operatorKey, secondOperand);
+    }
 });

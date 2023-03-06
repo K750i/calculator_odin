@@ -98,7 +98,7 @@ body {
     font-weight: 700;
 }
 
-.key.operator:hover {
+.key.operator:hover:enabled {
     background: #414b69;
 }
 
@@ -106,7 +106,7 @@ body {
     background: var(--key_color);
 }
 
-.key.func:hover {
+.key.func:hover:enabled {
     background: #2d3740;
 }
 
@@ -115,16 +115,21 @@ body {
     font-weight: 700;
 }
 
-.key.equal:hover {
-    background: #dd7d33;
+.key.equal:hover:enabled {
+    background: #e67925;
 }
 
-.button-wrapper .key:active {
+.button-wrapper .key:active:enabled {
     background: black;
 }
 
 .key.wide {
     flex-basis: 50%;
+}
+
+div.button-wrapper button:disabled {
+    background: #2d3448;
+    cursor: not-allowed;
 }
 
 footer {
@@ -138,4 +143,8 @@ footer {
 footer img {
     width: 23px;
     vertical-align: bottom;
+}
+
+.error {
+    font-size: 2.5rem;
 }

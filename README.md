@@ -1,6 +1,6 @@
 # Simple Calculator
 
-The Simple Calculator is a basic calculator that performs addition, subtraction, multiplication, and division, along with some additional functionalities. It can be used through the user interface or with the keyboard.
+The Simple Calculator is a basic calculator that performs addition, subtraction, multiplication, and division, along with some additional functionalities. It can be used through the user interface or with the keyboard. Visit the [page](https://k750i.github.io/calculator_odin/) for a demo of this project.
 
 ![Screenshot](./images/capture.png "Screenshot")
 

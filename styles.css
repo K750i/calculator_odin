@@ -61,6 +61,11 @@ body {
     justify-content: flex-end;
 }
 
+.main-display {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .secondary-display {
     font-size: 1.1rem;
     padding-right: 5px;
@@ -130,6 +135,11 @@ body {
 div.button-wrapper button:disabled {
     background: #2d3448;
     cursor: not-allowed;
+}
+
+button[data-type="key_del"]>img {
+    width: 32px;
+    vertical-align: bottom;
 }
 
 footer {

@@ -359,10 +359,6 @@ const processState = (state, evt) => {
             }
             break;
         case states.ERROR:
-            if (btnType === 'key_ac') {
-                resumeOperation();
-                return;
-            }
             if (btnType === 'number' || digits.includes(evt.key)) {
                 resumeOperation();
                 disp = evt.key ?? btnValue;

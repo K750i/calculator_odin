@@ -1,4 +1,5 @@
 'use strict';
+
 const buttons = document.querySelector('.button-wrapper');
 const optButtons = document.querySelectorAll('button.opt');
 const display = document.querySelector('.main-display');
@@ -6,6 +7,7 @@ const secondDisplay = document.querySelector('.secondary-display');
 const regex = /\.?0+$/;
 const digits = '1234567890';
 const op = '+-*/';
+const initialFontSize = '3.5';
 const states = {
     START: 1,   // initial state where no key is pressed
     FIRST_NUM: 2,   // number w/o decimal is displayed
@@ -31,7 +33,22 @@ const calculate = (operation, n1, n2) => {
     const result = operation(n1, n2).toPrecision(12);
     return result.replace(regex, '');
 };
-const updateDisplay = value => display.textContent = value;
+const dispWrapper = document.querySelector('.display-wrapper');
+const dispWrapperWidth = dispWrapper.clientWidth - parseInt(window.getComputedStyle(dispWrapper).paddingLeft) * 2;
+const updateDisplay = value => {
+    display.textContent = value;
+    const contentWidth = parseInt(window.getComputedStyle(display).width);
+    if (contentWidth > dispWrapperWidth) {
+        display.style.fontSize = decreaseFontSize(contentWidth, initialFontSize) + 'rem';
+    } else if (contentWidth / dispWrapperWidth < 0.7) {
+        display.style.fontSize = initialFontSize + 'rem';
+    }
+};
+const decreaseFontSize = (width, size) => {
+    if (width < dispWrapperWidth) return size;
+    display.style.fontSize = size + 'rem';
+    return decreaseFontSize(parseInt(window.getComputedStyle(display).width), size - 0.1);
+};
 const updateSecondaryDisplay = (first, operator, second) => {
     first = first ?? '';
     operator = toSymbols[operator] ?? '';

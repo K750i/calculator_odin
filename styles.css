@@ -63,6 +63,7 @@ body {
 }
 
 .main-display {
+    white-space: nowrap;
     width: min-content;
     margin-left: auto;
 }

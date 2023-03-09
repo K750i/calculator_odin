@@ -77,7 +77,8 @@ const deleteNum = state => {
 const isDivideByZero = () => operatorKey === 'div' && parseInt(disp) === 0;
 const haltOperation = () => {
     display.classList.add('error');
-    display.textContent = 'Cannot divide by zero';
+    disp = 'Cannot divide by zero';
+    updateDisplay(disp);
     secondDisplay.textContent = '';
     optButtons.forEach(btn => btn.setAttribute('disabled', ''));
 };
